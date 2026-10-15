@@ -11,11 +11,11 @@ import pytest
 import respx
 from fastmcp import Client
 from fastmcp.exceptions import ToolError
-from tests.conftest import load_fixture
 
 from clinical_trials_mcp import server
 from clinical_trials_mcp.client import TrialsClient
 from clinical_trials_mcp.server import build_search_params, normalize_phase, normalize_status
+from tests.conftest import load_fixture
 
 
 @pytest.fixture(autouse=True)

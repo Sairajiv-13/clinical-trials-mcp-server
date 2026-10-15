@@ -3,13 +3,13 @@
 from __future__ import annotations
 
 import pytest
-from tests.conftest import load_fixture
 
 from clinical_trials_mcp.eligibility import (
     evaluate_eligibility,
     normalize_sex,
     parse_age_to_years,
 )
+from tests.conftest import load_fixture
 
 
 @pytest.mark.parametrize(

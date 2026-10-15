@@ -5,7 +5,6 @@ from __future__ import annotations
 import httpx
 import pytest
 import respx
-from tests.conftest import BASE_URL, load_fixture
 
 from clinical_trials_mcp.client import TrialsClient
 from clinical_trials_mcp.config import Settings
@@ -15,6 +14,7 @@ from clinical_trials_mcp.errors import (
     UpstreamError,
     UpstreamUnavailableError,
 )
+from tests.conftest import BASE_URL, load_fixture
 
 
 async def test_get_study_returns_payload(
