@@ -4,9 +4,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from tests.conftest import load_fixture
-
 from clinical_trials_mcp.models import parse_detail, parse_summary
+from tests.conftest import load_fixture
 
 
 def test_parse_summary_recruiting_study() -> None:
