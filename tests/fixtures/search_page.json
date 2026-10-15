@@ -1,0 +1,336 @@
+{
+ "studies": [
+  {
+   "derivedSection": {
+    "miscInfoModule": {
+     "versionHolder": "2026-01-20"
+    }
+   },
+   "hasResults": false,
+   "protocolSection": {
+    "armsInterventionsModule": {
+     "armGroups": [
+      {
+       "description": "Metformin extended-release 1500 mg once daily for 24 weeks.",
+       "interventionNames": [
+        "Drug: Metformin XR 1500 mg"
+       ],
+       "label": "Metformin XR",
+       "type": "EXPERIMENTAL"
+      },
+      {
+       "description": "Matching placebo once daily for 24 weeks.",
+       "interventionNames": [
+        "Drug: Placebo"
+       ],
+       "label": "Placebo",
+       "type": "PLACEBO_COMPARATOR"
+      }
+     ],
+     "interventions": [
+      {
+       "armGroupLabels": [
+        "Metformin XR"
+       ],
+       "description": "Extended-release metformin, 1500 mg orally once daily.",
+       "name": "Metformin XR 1500 mg",
+       "type": "DRUG"
+      },
+      {
+       "armGroupLabels": [
+        "Placebo"
+       ],
+       "description": "Matching placebo tablet, orally once daily.",
+       "name": "Placebo",
+       "type": "DRUG"
+      }
+     ]
+    },
+    "conditionsModule": {
+     "conditions": [
+      "Type 2 Diabetes Mellitus"
+     ],
+     "keywords": [
+      "Diabetes",
+      "Metformin",
+      "HbA1c"
+     ]
+    },
+    "contactsLocationsModule": {
+     "centralContacts": [
+      {
+       "email": "t2dstudy@example.org",
+       "name": "Study Coordinator",
+       "phone": "555-010-2200",
+       "role": "CONTACT"
+      }
+     ],
+     "locations": [
+      {
+       "city": "Rochester",
+       "contacts": [
+        {
+         "email": "jdoe@example.org",
+         "name": "Jane Doe, MD",
+         "phone": "555-010-2233",
+         "role": "CONTACT"
+        }
+       ],
+       "country": "United States",
+       "facility": "University Medical Center",
+       "geoPoint": {
+        "lat": 44.0216,
+        "lon": -92.4699
+       },
+       "state": "Minnesota",
+       "status": "RECRUITING",
+       "zip": "55905"
+      },
+      {
+       "city": "Chicago",
+       "country": "United States",
+       "facility": "Lakeside Research Hospital",
+       "geoPoint": {
+        "lat": 41.8967,
+        "lon": -87.6195
+       },
+       "state": "Illinois",
+       "status": "RECRUITING",
+       "zip": "60611"
+      },
+      {
+       "city": "Phoenix",
+       "country": "United States",
+       "facility": "Desert Valley Clinic",
+       "geoPoint": {
+        "lat": 33.4484,
+        "lon": -112.074
+       },
+       "state": "Arizona",
+       "status": "NOT_YET_RECRUITING",
+       "zip": "85004"
+      },
+      {
+       "city": "Minneapolis",
+       "country": "United States",
+       "facility": "Northgate Health",
+       "geoPoint": {
+        "lat": 44.9778,
+        "lon": -93.265
+       },
+       "state": "Minnesota",
+       "zip": "55455"
+      }
+     ]
+    },
+    "descriptionModule": {
+     "briefSummary": "This study tests whether extended-release metformin improves glycemic control over 24 weeks in adults with type 2 diabetes who are not reaching target HbA1c on diet alone.",
+     "detailedDescription": "Participants are randomized 1:1 to metformin XR 1500 mg once daily or matching placebo for 24 weeks. The primary outcome is change in HbA1c from baseline to week 24."
+    },
+    "designModule": {
+     "designInfo": {
+      "allocation": "RANDOMIZED",
+      "interventionModel": "PARALLEL",
+      "maskingInfo": {
+       "masking": "DOUBLE",
+       "whoMasked": [
+        "PARTICIPANT",
+        "INVESTIGATOR"
+       ]
+      },
+      "primaryPurpose": "TREATMENT"
+     },
+     "enrollmentInfo": {
+      "count": 240,
+      "type": "ESTIMATED"
+     },
+     "phases": [
+      "PHASE2"
+     ],
+     "studyType": "INTERVENTIONAL"
+    },
+    "eligibilityModule": {
+     "eligibilityCriteria": "Inclusion Criteria:\n\n* Age 18 to 75 years\n* Diagnosis of type 2 diabetes mellitus\n* HbA1c between 7.0% and 10.5% at screening\n* BMI between 25 and 45 kg/m2\n\nExclusion Criteria:\n\n* Use of insulin or GLP-1 receptor agonists within 3 months\n* eGFR below 45 mL/min/1.73 m2\n* History of lactic acidosis",
+     "healthyVolunteers": false,
+     "maximumAge": "75 Years",
+     "minimumAge": "18 Years",
+     "sex": "ALL",
+     "stdAges": [
+      "ADULT",
+      "OLDER_ADULT"
+     ]
+    },
+    "identificationModule": {
+     "briefTitle": "Metformin XR in Adults With Type 2 Diabetes",
+     "nctId": "NCT06001122",
+     "officialTitle": "A Phase 2, Randomized, Double-Blind Study of Extended-Release Metformin in Adults With Type 2 Diabetes",
+     "orgStudyIdInfo": {
+      "id": "T2D-2024-011"
+     },
+     "organization": {
+      "class": "OTHER",
+      "fullName": "University Medical Center"
+     }
+    },
+    "outcomesModule": {
+     "primaryOutcomes": [
+      {
+       "measure": "Change in HbA1c from baseline",
+       "timeFrame": "Baseline to week 24"
+      }
+     ]
+    },
+    "sponsorCollaboratorsModule": {
+     "collaborators": [
+      {
+       "class": "NIH",
+       "name": "National Institute of Diabetes and Digestive and Kidney Diseases (NIDDK)"
+      }
+     ],
+     "leadSponsor": {
+      "class": "OTHER",
+      "name": "University Medical Center"
+     },
+     "responsibleParty": {
+      "type": "SPONSOR"
+     }
+    },
+    "statusModule": {
+     "completionDateStruct": {
+      "date": "2027-12-31",
+      "type": "ESTIMATED"
+     },
+     "expandedAccessInfo": {
+      "hasExpandedAccess": false
+     },
+     "lastUpdatePostDateStruct": {
+      "date": "2026-01-15",
+      "type": "ESTIMATED"
+     },
+     "lastUpdateSubmitDate": "2026-01-10",
+     "overallStatus": "RECRUITING",
+     "primaryCompletionDateStruct": {
+      "date": "2027-06-30",
+      "type": "ESTIMATED"
+     },
+     "startDateStruct": {
+      "date": "2025-03-01",
+      "type": "ACTUAL"
+     },
+     "statusVerifiedDate": "2025-11"
+    }
+   }
+  },
+  {
+   "hasResults": false,
+   "protocolSection": {
+    "armsInterventionsModule": {
+     "interventions": [
+      {
+       "armGroupLabels": [
+        "Inositol"
+       ],
+       "description": "Myo-inositol powder, 4 g daily, dissolved in water.",
+       "name": "Myo-Inositol 4 g",
+       "type": "DIETARY_SUPPLEMENT"
+      }
+     ]
+    },
+    "conditionsModule": {
+     "conditions": [
+      "Polycystic Ovary Syndrome"
+     ]
+    },
+    "contactsLocationsModule": {
+     "locations": [
+      {
+       "city": "Boston",
+       "country": "United States",
+       "facility": "Women's Health Research Institute",
+       "geoPoint": {
+        "lat": 42.3358,
+        "lon": -71.1061
+       },
+       "state": "Massachusetts",
+       "zip": "02115"
+      }
+     ]
+    },
+    "descriptionModule": {
+     "briefSummary": "This study evaluates myo-inositol supplementation over 6 months in women with polycystic ovary syndrome."
+    },
+    "designModule": {
+     "designInfo": {
+      "allocation": "RANDOMIZED",
+      "interventionModel": "PARALLEL",
+      "primaryPurpose": "TREATMENT"
+     },
+     "enrollmentInfo": {
+      "count": 180,
+      "type": "ESTIMATED"
+     },
+     "phases": [
+      "PHASE3"
+     ],
+     "studyType": "INTERVENTIONAL"
+    },
+    "eligibilityModule": {
+     "eligibilityCriteria": "Inclusion Criteria:\n\n* Female, age 18 to 45 years\n* Diagnosis of polycystic ovary syndrome by Rotterdam criteria\n\nExclusion Criteria:\n\n* Pregnancy or planned pregnancy during the study\n* Use of hormonal contraception within 2 months",
+     "healthyVolunteers": false,
+     "maximumAge": "45 Years",
+     "minimumAge": "18 Years",
+     "sex": "FEMALE",
+     "stdAges": [
+      "ADULT"
+     ]
+    },
+    "identificationModule": {
+     "briefTitle": "Inositol Therapy for Polycystic Ovary Syndrome",
+     "nctId": "NCT06003344",
+     "officialTitle": "A Phase 3 Study of Myo-Inositol in Women With Polycystic Ovary Syndrome",
+     "orgStudyIdInfo": {
+      "id": "PCOS-2023-204"
+     },
+     "organization": {
+      "class": "OTHER",
+      "fullName": "Women's Health Research Institute"
+     }
+    },
+    "sponsorCollaboratorsModule": {
+     "leadSponsor": {
+      "class": "OTHER",
+      "name": "Women's Health Research Institute"
+     },
+     "responsibleParty": {
+      "type": "SPONSOR"
+     }
+    },
+    "statusModule": {
+     "completionDateStruct": {
+      "date": "2026-11-30",
+      "type": "ESTIMATED"
+     },
+     "expandedAccessInfo": {
+      "hasExpandedAccess": false
+     },
+     "lastUpdatePostDateStruct": {
+      "date": "2025-12-02",
+      "type": "ACTUAL"
+     },
+     "overallStatus": "ACTIVE_NOT_RECRUITING",
+     "primaryCompletionDateStruct": {
+      "date": "2026-08-31",
+      "type": "ESTIMATED"
+     },
+     "startDateStruct": {
+      "date": "2024-05-15",
+      "type": "ACTUAL"
+     },
+     "statusVerifiedDate": "2025-09"
+    }
+   }
+  }
+ ],
+ "totalCount": 137,
+ "nextPageToken": "ZVNjX3Rva2VuX2ZpeHR1cmU"
+}
