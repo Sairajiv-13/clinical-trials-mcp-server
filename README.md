@@ -7,6 +7,24 @@ An MCP (Model Context Protocol) server that gives an LLM structured access to th
 ![License](https://img.shields.io/badge/license-MIT-green)
 ![MCP](https://img.shields.io/badge/MCP-server-purple)
 
+## Problem
+
+Clinical trial data is public and rich, but it sits behind a registry API that models cannot use directly. Eligibility is the risky part: a tool that guesses at criteria it cannot evaluate can mislead a patient or a researcher.
+
+## Approach
+
+A FastMCP server over the public ClinicalTrials.gov API v2, with four tools: search trials, fetch one trial, check eligibility from a patient profile, and list recruiting sites. Eligibility is split on purpose. Deterministic fields (age, sex) are decided by the server. The inclusion and exclusion text is returned for the calling model to judge, and the server says which is which. The server runs over stdio for local clients and streamable HTTP for hosted use, with a short TTL cache on upstream calls.
+
+## Results
+
+- 73 tests, 92 percent coverage, ruff clean, green CI
+- Released as v1.0.0, with a container image published to GHCR: https://github.com/users/Sairajiv-13/packages/container/package/clinical-trials-mcp-server
+- No API key is needed at any point; the upstream API is public
+
+## Tech stack
+
+Python, FastMCP, httpx, pydantic, Docker, GitHub Actions
+
 ## Architecture
 
 The tool layer is thin. Each tool builds query parameters, calls one async client, and parses the response into a pydantic model. Everything except `server.py` is plain Python with no framework dependency, so the parsing and eligibility logic can be tested without starting a server.
