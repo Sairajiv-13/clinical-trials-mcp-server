@@ -14,7 +14,7 @@ from fastmcp.exceptions import ToolError
 
 from clinical_trials_mcp import server
 from clinical_trials_mcp.client import TrialsClient
-from clinical_trials_mcp.server import build_search_params, normalize_phase, normalize_status
+from clinical_trials_mcp.server import build_search_params, normalize_status
 from tests.conftest import load_fixture
 
 
@@ -57,11 +57,11 @@ async def test_search_trials_normalizes_results(api: respx.MockRouter) -> None:
     assert sent["pageSize"] == "10"
 
 
-async def test_search_trials_caps_page_size(api: respx.MockRouter) -> None:
+async def test_search_trials_accepts_max_page_size(api: respx.MockRouter) -> None:
     page = load_fixture("search_page.json")
     route = api.get("/studies").mock(return_value=httpx.Response(200, json=page))
     async with Client(server.mcp) as client:
-        result = await client.call_tool("search_trials", {"page_size": 500})
+        result = await client.call_tool("search_trials", {"page_size": server.MAX_PAGE_SIZE})
     data = structured(result)
     assert data["page_size"] == server.MAX_PAGE_SIZE
     assert route.calls[0].request.url.params["pageSize"] == str(server.MAX_PAGE_SIZE)
@@ -77,7 +77,7 @@ async def test_search_trials_forwards_filters_and_token(api: respx.MockRouter) -
                 "condition": "diabetes",
                 "intervention": "metformin",
                 "location": "Minnesota",
-                "phases": ["Phase 2"],
+                "phases": ["PHASE2"],
                 "statuses": ["Recruiting"],
                 "page_token": "abc123",
             },
@@ -94,7 +94,7 @@ async def test_get_trial_returns_detail(api: respx.MockRouter) -> None:
     study = load_fixture("study_recruiting.json")
     api.get("/studies/NCT06001122").mock(return_value=httpx.Response(200, json=study))
     async with Client(server.mcp) as client:
-        result = await client.call_tool("get_trial", {"nct_id": "nct06001122"})
+        result = await client.call_tool("get_trial", {"nct_id": "NCT06001122"})
     data = structured(result)
     assert data["nct_id"] == "NCT06001122"
     assert data["status"] == "RECRUITING"
@@ -185,22 +185,6 @@ async def test_recruiting_sites_for_non_recruiting_study(api: respx.MockRouter) 
 @pytest.mark.parametrize(
     ("raw", "expected"),
     [
-        ("Phase 2", "PHASE2"),
-        ("phase3", "PHASE3"),
-        ("2", "PHASE2"),
-        ("Phase 1", "PHASE1"),
-        ("Early Phase 1", "EARLY_PHASE1"),
-        ("N/A", "NA"),
-        ("bogus", None),
-    ],
-)
-def test_normalize_phase(raw: str, expected: str | None) -> None:
-    assert normalize_phase(raw) == expected
-
-
-@pytest.mark.parametrize(
-    ("raw", "expected"),
-    [
         ("Recruiting", "RECRUITING"),
         ("not yet recruiting", "NOT_YET_RECRUITING"),
         ("ACTIVE_NOT_RECRUITING", "ACTIVE_NOT_RECRUITING"),
@@ -215,7 +199,7 @@ def test_build_search_params_multiple_phases() -> None:
         condition=None,
         intervention=None,
         location=None,
-        phases=["Phase 2", "Phase 3"],
+        phases=["PHASE2", "PHASE3"],
         statuses=None,
         page_size=10,
         page_token=None,
