@@ -55,12 +55,14 @@ Search the registry. At least one filter should be given; results come back with
 | `condition` | string, optional | Condition or disease, matched by the API's own search |
 | `intervention` | string, optional | Drug, device, or procedure name |
 | `location` | string, optional | City, state, or country text matched against study sites |
-| `phases` | list of string, optional | For example `["Phase 2", "Phase 3"]` |
+| `phases` | list of phase codes, optional | `EARLY_PHASE1`, `PHASE1`, `PHASE2`, `PHASE3`, `PHASE4`, or `NA` |
 | `statuses` | list of string, optional | For example `["RECRUITING"]` |
 | `page_size` | int | 1 to 50, default 10 |
 | `page_token` | string, optional | From a previous result's `next_page_token` |
 
 Output: `total_count`, `returned_count`, `page_size`, `next_page_token`, and `trials`, where each trial has an NCT id, title, status, phases, conditions, intervention names, lead sponsor, and key dates.
+
+The server accepts uppercase NCT IDs followed by exactly eight ASCII digits and integer page sizes from 1 to 50. Invalid tool arguments return JSON-RPC `-32602` before any registry request. `pytest -q tests/test_stdio.py` checks the real subprocess and uses a loopback registry fixture.
 
 ### `get_trial`
 

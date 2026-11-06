@@ -12,11 +12,15 @@ from __future__ import annotations
 
 import argparse
 import re
-from typing import Annotated
+from inspect import Parameter, signature
+from typing import Annotated, Literal, get_type_hints
 
 from fastmcp import FastMCP
 from fastmcp.exceptions import ToolError
-from pydantic import Field
+from fastmcp.server.middleware import Middleware
+from mcp.shared.exceptions import MCPError
+from mcp_types import INVALID_PARAMS
+from pydantic import ConfigDict, Field, ValidationError, create_model
 
 from .client import TrialsClient
 from .eligibility import evaluate_eligibility
@@ -35,6 +39,9 @@ from .models import (
 
 MAX_PAGE_SIZE = 50
 DEFAULT_PAGE_SIZE = 10
+NctId = Annotated[str, Field(pattern=r"^NCT[0-9]{8}$", description="NCT number, e.g. NCT04354155.")]
+Phase = Literal["EARLY_PHASE1", "PHASE1", "PHASE2", "PHASE3", "PHASE4", "NA"]
+PageSize = Annotated[int, Field(strict=True, ge=1, le=MAX_PAGE_SIZE)]
 
 mcp = FastMCP(
     "clinical-trials-mcp",
@@ -67,34 +74,6 @@ def set_client(client: TrialsClient | None) -> None:
 # Query parameter helpers
 # ---------------------------------------------------------------------------
 
-_PHASE_ALIASES = {
-    "0": "EARLY_PHASE1",
-    "EARLY": "EARLY_PHASE1",
-    "EARLYPHASE1": "EARLY_PHASE1",
-    "1": "PHASE1",
-    "PHASE1": "PHASE1",
-    "2": "PHASE2",
-    "PHASE2": "PHASE2",
-    "3": "PHASE3",
-    "PHASE3": "PHASE3",
-    "4": "PHASE4",
-    "PHASE4": "PHASE4",
-    "NA": "NA",
-    "NOTAPPLICABLE": "NA",
-}
-
-
-def normalize_phase(raw: str) -> str | None:
-    """Normalize 'Phase 2', 'phase2', or '2' to the API value 'PHASE2'.
-
-    Returns None for anything that is not a recognized phase, so a stray
-    filter value is dropped instead of sent to the API.
-    """
-    compact = raw.strip().upper()
-    for char in (" ", "-", "_", "/"):
-        compact = compact.replace(char, "")
-    return _PHASE_ALIASES.get(compact)
-
 
 def normalize_status(raw: str) -> str:
     """Normalize 'recruiting' or 'Not Yet Recruiting' to the API enum form."""
@@ -106,7 +85,7 @@ def build_search_params(
     condition: str | None,
     intervention: str | None,
     location: str | None,
-    phases: list[str] | None,
+    phases: list[Phase] | None,
     statuses: list[str] | None,
     page_size: int,
     page_token: str | None,
@@ -121,13 +100,8 @@ def build_search_params(
     if statuses:
         params["filter.overallStatus"] = ",".join(normalize_status(s) for s in statuses)
     if phases:
-        normalized = [p for p in (normalize_phase(p) for p in phases) if p]
-        if normalized:
-            if len(normalized) == 1:
-                params["filter.advanced"] = f"AREA[Phase]{normalized[0]}"
-            else:
-                joined = " OR ".join(normalized)
-                params["filter.advanced"] = f"AREA[Phase]({joined})"
+        expression = phases[0] if len(phases) == 1 else "(" + " OR ".join(phases) + ")"
+        params["filter.advanced"] = f"AREA[Phase]{expression}"
     if page_token:
         params["pageToken"] = page_token
     return params
@@ -151,8 +125,8 @@ async def search_trials(
         Field(description="City, state, or country text matched against study sites."),
     ] = None,
     phases: Annotated[
-        list[str] | None,
-        Field(description="Phase filter, e.g. ['Phase 2', 'Phase 3']. Omit for all phases."),
+        list[Phase] | None,
+        Field(description="Phase filter, e.g. ['PHASE2', 'PHASE3']. Omit for all phases."),
     ] = None,
     statuses: Annotated[
         list[str] | None,
@@ -162,9 +136,7 @@ async def search_trials(
             "COMPLETED, SUSPENDED, TERMINATED, WITHDRAWN."
         ),
     ] = None,
-    page_size: Annotated[
-        int, Field(description=f"Results per page, 1 to {MAX_PAGE_SIZE}.")
-    ] = DEFAULT_PAGE_SIZE,
+    page_size: PageSize = DEFAULT_PAGE_SIZE,
     page_token: Annotated[
         str | None,
         Field(description="Token from a previous result's next_page_token, for paging."),
@@ -176,14 +148,13 @@ async def search_trials(
     whole registry one page at a time. Ordering is whatever the API returns
     for the query; this tool does not re-sort.
     """
-    capped = max(1, min(page_size, MAX_PAGE_SIZE))
     params = build_search_params(
         condition=condition,
         intervention=intervention,
         location=location,
         phases=phases,
         statuses=statuses,
-        page_size=capped,
+        page_size=page_size,
         page_token=page_token,
     )
     try:
@@ -197,7 +168,7 @@ async def search_trials(
     return SearchResult(
         total_count=total if isinstance(total, int) else None,
         returned_count=len(studies),
-        page_size=capped,
+        page_size=page_size,
         next_page_token=payload.get("nextPageToken"),
         trials=[parse_summary(study) for study in studies if isinstance(study, dict)],
     )
@@ -205,7 +176,7 @@ async def search_trials(
 
 @mcp.tool
 async def get_trial(
-    nct_id: Annotated[str, Field(description="NCT number, e.g. 'NCT04354155'.")],
+    nct_id: NctId,
 ) -> TrialDetail:
     """Get one study by NCT number, normalized into a readable structure.
 
@@ -214,7 +185,7 @@ async def get_trial(
     counts, sponsor, enrollment, and key dates.
     """
     try:
-        study = await get_client().get_study(nct_id.strip().upper())
+        study = await get_client().get_study(nct_id)
     except TrialsError as exc:
         raise ToolError(str(exc)) from exc
     return parse_detail(study)
@@ -222,7 +193,7 @@ async def get_trial(
 
 @mcp.tool
 async def eligibility_check(
-    nct_id: Annotated[str, Field(description="NCT number, e.g. 'NCT04354155'.")],
+    nct_id: NctId,
     age: Annotated[
         float | None,
         Field(description="Patient age in years. Fractional values are fine (0.5 = 6 months)."),
@@ -239,7 +210,7 @@ async def eligibility_check(
     eligibility decision.
     """
     try:
-        study = await get_client().get_study(nct_id.strip().upper())
+        study = await get_client().get_study(nct_id)
     except TrialsError as exc:
         raise ToolError(str(exc)) from exc
     return evaluate_eligibility(study, patient_age=age, patient_sex=sex)
@@ -247,7 +218,7 @@ async def eligibility_check(
 
 @mcp.tool
 async def recruiting_sites(
-    nct_id: Annotated[str, Field(description="NCT number, e.g. 'NCT04354155'.")],
+    nct_id: NctId,
     city: Annotated[str | None, Field(description="Only sites in this city.")] = None,
     state: Annotated[str | None, Field(description="Only sites in this state or region.")] = None,
     country: Annotated[str | None, Field(description="Only sites in this country.")] = None,
@@ -260,7 +231,7 @@ async def recruiting_sites(
     for a site.
     """
     try:
-        study = await get_client().get_study(nct_id.strip().upper())
+        study = await get_client().get_study(nct_id)
     except TrialsError as exc:
         raise ToolError(str(exc)) from exc
     detail = parse_detail(study)
@@ -289,9 +260,37 @@ async def recruiting_sites(
     )
 
 
-# ---------------------------------------------------------------------------
-# Entry point
-# ---------------------------------------------------------------------------
+def tool_input_model(tool):
+    """Reuse the public tool annotations for strict validation before dispatch."""
+    hints = get_type_hints(tool, include_extras=True)
+    return create_model(
+        f"{tool.__name__}_input",
+        __config__=ConfigDict(strict=True, extra="forbid"),
+        **{
+            name: (hints[name], ... if field.default is Parameter.empty else field.default)
+            for name, field in signature(tool).parameters.items()
+        },
+    )
+
+
+_TOOL_INPUTS = {
+    tool.__name__: tool_input_model(tool)
+    for tool in (search_trials, get_trial, eligibility_check, recruiting_sites)
+}
+
+
+class StrictToolInputs(Middleware):
+    async def on_call_tool(self, context, call_next):
+        model = _TOOL_INPUTS.get(context.message.name)
+        if model is not None:
+            try:
+                model.model_validate(context.message.arguments or {})
+            except ValidationError:
+                raise MCPError(code=INVALID_PARAMS, message="Invalid tool arguments") from None
+        return await call_next(context)
+
+
+mcp.add_middleware(StrictToolInputs())
 
 
 def main() -> None:
